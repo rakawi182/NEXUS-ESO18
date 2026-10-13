@@ -1,0 +1,347 @@
+cff-version: 1.2.0
+message: "If you use this software in academic work, please cite it as below, together with the underlying sources listed under 'references'."
+title: "NEXUS · HUD: A Self-Contained Offline Astronomical Ephemeris Engine"
+abstract: >-
+  NEXUS · HUD is a single-file HTML application providing high-precision
+  ephemerides for the Sun, the Moon, and a curated catalogue of 80 bright
+  stars, with interactive 3D visualisation of the celestial sphere and the
+  lunar surface, a Besselian eclipse-path renderer with Watts limb
+  correction, a GNSS-aware time-scale converter spanning 12 scales, and an
+  embedded self-audit of 113 numerical checks executed live in the browser.
+  The software has no external dependencies and requires no network access.
+type: software
+authors:
+  - family-names: "Kawi"
+    given-names: "Ra"
+    alias: "rakawi182"
+    affiliation: "Independent researcher"
+version: "1.0.0"
+date-released: "2026-10-13"
+license: MIT
+repository-code: "https://github.com/rakawi182/NEXUS-ESO18"
+keywords:
+  - astronomy
+  - ephemeris
+  - celestial mechanics
+  - lunar theory
+  - eclipse prediction
+  - time scales
+  - GNSS
+  - WebGL
+  - offline application
+references:
+  # [1] ELP/MPP02 lunar theory
+  - type: article
+    title: "The ELP/MPP02 lunar theory"
+    authors:
+      - family-names: Chapront
+        given-names: J.
+      - family-names: Francou
+        given-names: G.
+    journal: "Astronomy & Astrophysics"
+    volume: 404
+    start: 735
+    year: 2003
+    institution:
+      name: "Institut de Mécanique Céleste et de Calcul des Éphémérides (IMCCE), Observatoire de Paris"
+
+  # [2] LLR determination of lunar parameters
+  - type: article
+    title: "LLR determination of lunar parameters"
+    authors:
+      - family-names: Chapront
+        given-names: J.
+      - family-names: Chapront-Touzé
+        given-names: M.
+      - family-names: Francou
+        given-names: G.
+    journal: "Astronomy & Astrophysics"
+    volume: 387
+    start: 700
+    year: 2002
+    institution:
+      name: "Institut de Mécanique Céleste et de Calcul des Éphémérides (IMCCE), Observatoire de Paris"
+  - type: article
+    title: "Lunar motion theory: constants and complements"
+    authors:
+      - family-names: Chapront
+        given-names: J.
+      - family-names: Chapront-Touzé
+        given-names: M.
+      - family-names: Francou
+        given-names: G.
+    journal: "Astronomy & Astrophysics"
+    volume: 343
+    start: 624
+    year: 1999
+
+  # [3] ELP 2000-85 and JANUS
+  - type: article
+    title: "ELP 2000-85: a semi-analytical lunar ephemeris adequate for historical times"
+    authors:
+      - family-names: Chapront-Touzé
+        given-names: M.
+      - family-names: Chapront
+        given-names: J.
+    journal: "Astronomy & Astrophysics"
+    volume: 190
+    start: 342
+    year: 1988
+  - type: book
+    title: "Lunar Tables and Programs from 4000 B.C. to A.D. 8000"
+    authors:
+      - family-names: Chapront-Touzé
+        given-names: M.
+      - family-names: Chapront
+        given-names: J.
+    publisher: "Willmann-Bell"
+    year: 1991
+    notes: "JANUS 98.12 documentation, used beyond |t| = 30 cy"
+
+  # [4] VSOP2013, INPOP10a, IPS2000, DE405/406
+  - type: article
+    title: "Numerical integration of planetary motions: VSOP2013"
+    authors:
+      - family-names: Simon
+        given-names: J.-L.
+      - family-names: Francou
+        given-names: G.
+      - family-names: Fienga
+        given-names: A.
+      - family-names: Manche
+        given-names: H.
+    journal: "Astronomy & Astrophysics"
+    volume: 557
+    start: A49
+    year: 2013
+    url: "ftp://ftp.imcce.fr/pub/ephem/planets/vsop2013"
+    institution:
+      name: "Institut de Mécanique Céleste et de Calcul des Éphémérides (IMCCE), Observatoire de Paris"
+  - type: article
+    title: "The INPOP10a planetary and lunar ephemeris"
+    authors:
+      - family-names: Fienga
+        given-names: A.
+      - family-names: Laskar
+        given-names: J.
+      - family-names: Kuchynka
+        given-names: P.
+      - family-names: Manche
+        given-names: H.
+      - family-names: Gastineau
+        given-names: M.
+    journal: "Celestial Mechanics and Dynamical Astronomy"
+    volume: 111
+    start: 363
+    year: 2011
+    institution:
+      name: "Institut de Mécanique Céleste et de Calcul des Éphémérides (IMCCE), Observatoire de Paris"
+  - type: book
+    title: "Improved Planetary Solutions IPS2000, notice"
+    authors:
+      - family-names: Chapront
+        given-names: J.
+      - family-names: Francou
+        given-names: G.
+    year: 2002
+    institution:
+      name: "Institut de Mécanique Céleste et de Calcul des Éphémérides (IMCCE), Observatoire de Paris"
+  - type: book
+    title: "JPL Planetary and Lunar Ephemerides, DE405/LE405 and DE406 documentation"
+    authors:
+      - family-names: Standish
+        given-names: E. M.
+    publisher: "JPL IOM 312.F-98-048"
+    year: 1998
+    institution:
+      name: "Jet Propulsion Laboratory"
+
+  # [5] Lunar libration series
+  - type: software
+    title: "Lunar libration series LLIB04, LLIB245/403/405 and numerical complements"
+    authors:
+      - family-names: Chapront
+        given-names: J.
+      - family-names: Chapront-Touzé
+        given-names: M.
+      - family-names: Francou
+        given-names: G.
+    url: "https://polac.obspm.fr"
+    institution:
+      name: "SYRTE, Observatoire de Paris"
+  - type: article
+    title: "Physical libration of the Moon"
+    authors:
+      - family-names: Moons
+        given-names: M.
+    journal: "The Moon and the Planets"
+    volume: 27
+    start: 257
+    year: 1982
+  - type: book
+    title: "Astronomical Algorithms"
+    edition: "2nd"
+    authors:
+      - family-names: Meeus
+        given-names: J.
+    publisher: "Willmann-Bell"
+    year: 1998
+    notes: "Chapter 53: optical libration, used for the audit check"
+
+  # [6] IERS Conventions
+  - type: book
+    title: "IERS Conventions (2010), IERS Technical Note 36"
+    editors:
+      - family-names: Petit
+        given-names: G.
+      - family-names: Luzum
+        given-names: B.
+    publisher: "Verlag des Bundesamts für Kartographie und Geodäsie"
+    year: 2010
+    institution:
+      name: "International Earth Rotation and Reference Systems Service (IERS)"
+  - type: article
+    title: "Expressions for the celestial intermediate pole and celestial intermediate origin"
+    authors:
+      - family-names: Capitaine
+        given-names: N.
+      - family-names: Wallace
+        given-names: P. T.
+      - family-names: Chapront
+        given-names: J.
+    journal: "Astronomy & Astrophysics"
+    volume: 412
+    start: 567
+    year: 2003
+    institution:
+      name: "SYRTE, Observatoire de Paris"
+  - type: article
+    title: "Precession-nutation procedures consistent with IAU 2006 resolutions"
+    authors:
+      - family-names: Wallace
+        given-names: P. T.
+      - family-names: Capitaine
+        given-names: N.
+    journal: "Astronomy & Astrophysics"
+    volume: 459
+    start: 981
+    year: 2006
+  - type: article
+    title: "Modeling of nutation and precession: new nutation series for nonrigid Earth"
+    authors:
+      - family-names: Mathews
+        given-names: P. M.
+      - family-names: Herring
+        given-names: T. A.
+      - family-names: Buffett
+        given-names: B. A.
+    journal: "Journal of Geophysical Research"
+    volume: 107
+    issue: B4
+    start: 2068
+    year: 2002
+
+  # [7] SOFA
+  - type: software
+    title: "IAU SOFA Software Collection"
+    authors:
+      - name: "IAU SOFA Board"
+    url: "https://www.iausofa.org"
+    notes: "Reference implementations iauNut06a, iauEpv00, iauAtci13, iauAb, iauLd, iauTttcg, iauEra00, iauGmst06, iauGst06a, iauEors"
+    institution:
+      name: "International Astronomical Union"
+
+  # [8] ΔT and EOP
+  - type: article
+    title: "Measurement of the Earth's rotation: 720 BC to AD 2015"
+    authors:
+      - family-names: Stephenson
+        given-names: F. R.
+      - family-names: Morrison
+        given-names: L. V.
+      - family-names: Hohenkerk
+        given-names: C. Y.
+    journal: "Proceedings of the Royal Society A"
+    volume: 472
+    start: 20160404
+    year: 2016
+  - type: software
+    title: "IERS EOP 20C04 and Bulletin A / Bulletin C"
+    authors:
+      - name: "International Earth Rotation and Reference Systems Service"
+    url: "https://www.iers.org"
+  - type: software
+    title: "IERS Leap Second Table"
+    authors:
+      - name: "International Earth Rotation and Reference Systems Service"
+    url: "https://www.iers.org"
+
+  # [9] Eclipse canon
+  - type: book
+    title: "Five Millennium Canon of Solar Eclipses: -1999 to +3000"
+    authors:
+      - family-names: Espenak
+        given-names: F.
+      - family-names: Meeus
+        given-names: J.
+    publisher: "NASA/TP-2006-214141"
+    year: 2006
+    institution:
+      name: "NASA Goddard Space Flight Center"
+  - type: book
+    title: "Five Millennium Canon of Lunar Eclipses: -1999 to +3000"
+    authors:
+      - family-names: Espenak
+        given-names: F.
+      - family-names: Meeus
+        given-names: J.
+    publisher: "NASA/TP-2009-214172"
+    year: 2009
+    institution:
+      name: "NASA Goddard Space Flight Center"
+  - type: book
+    title: "Explanatory Supplement to the Astronomical Almanac"
+    edition: "3rd"
+    editors:
+      - family-names: Urban
+        given-names: S. E.
+      - family-names: Seidelmann
+        given-names: P. K.
+    publisher: "University Science Books"
+    year: 2013
+
+  # [10] Lunar radius
+  - type: article
+    title: "Report of the IAU Working Group on Cartographic Coordinates and Rotational Elements: 2009"
+    authors:
+      - family-names: Archinal
+        given-names: B. A.
+      - family-names: et al.
+    journal: "Celestial Mechanics and Dynamical Astronomy"
+    volume: 109
+    start: 101
+    year: 2011
+    institution:
+      name: "International Astronomical Union"
+
+  # [11] Star catalogue
+  - type: software
+    title: "star_c.json: 80-star catalogue supplied with the project"
+    authors:
+      - name: "Ra Kawi"
+    year: 2026
+    notes: "Source not stated; 12 rows corrected from earlier list; 30 rows rounded to 1 arcminute are marked * in the audit"
+
+  # Textures
+  - type: software
+    title: "HiPS2FITS: Fast generation of FITS images cutouts from HiPS datasets"
+    authors:
+      - name: "Centre de Données astronomiques de Strasbourg (CDS)"
+    url: "https://alasky.cds.unistra.fr/hips-image-services/hips2fits"
+    notes: "Survey CDS/P/Moon/LROC-WAC-GLD100-118m used for the lunar albedo mosaic"
+  - type: software
+    title: "Gaia Sky virtual texture: vt-moon-topography-lro"
+    authors:
+      - name: "Gaia Sky project"
+    url: "https://gaiasky.space"
+    notes: "GLD100 tiles assembled into 4096x2048 heightmap used for lunar relief"
