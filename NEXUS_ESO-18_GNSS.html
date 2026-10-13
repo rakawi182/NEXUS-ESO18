@@ -1142,7 +1142,7 @@ let TRJ=0;function trailJob(E,cb){if(TRJ)return;TRJ=1;const t0=S.t,ce=Math.cos(E
 function trailSync(E){const ce=Math.cos(E.eps),se=Math.sin(E.eps),pts=[];for(let d=-15;d<=15.001;d+=.5){const t=S.t+d*864e5,e2=ephSM(t),m=e2.moon;pts.push({t,p:v3.s([m[0],m[1]*ce+m[2]*se,-m[1]*se+m[2]*ce],e2.mdist)})}OC.tr={t:S.t,pts}}
 function trailPts(E){
  if(!OC.tr){trailSync(E);return OC.tr.pts}
- const tmin=S.t-15*864e5,tmax=S.t+15*864e5,pts=OC.tr.pts;
+ const tmin=S.t-15.5*864e5,tmax=S.t+15.5*864e5,pts=OC.tr.pts;
  while(pts.length&&pts[0].t<tmin)pts.shift();
  while(pts.length&&pts[pts.length-1].t>tmax)pts.pop();
  if(!pts.length){trailSync(E);return OC.tr.pts}
@@ -1173,9 +1173,13 @@ function drawOrbit(){const cv=$('#ob1'),g=cv.getContext('2d'),W=cv.width,H=cv.he
  for(let a=0;a<360;a+=30){const t=a*D;L([0,0,0],[R0*Math.cos(t),R0*Math.sin(t),0],'#1d2d4d',1,.7);TX([R0*1.07*Math.cos(t),R0*1.07*Math.sin(t),0],a+'\u00b0','#6f82ab',-W/60,W/150)}
  const se=B.se,ce=B.ce,pole=[0,se,ce];
  if(EM){const Rm=406700,u=v=>v3.s(v,1/Rm),mk=u(Mk),rE=6378.137/Rm*(OC.big?5:1),rM=1737.4/Rm*(OC.big?10:1);
-  if(OC.trail){const tp=trailPts(E).map(q=>u(q.p));PLY(tp,'rgba(92,242,255,.65)',W/400,1);{const pts=trailPts(E);const marks=[-15,-10,-5,5,10,15];
- for(const m of marks){let best=null,bd=99;for(const q of pts){const d=(q.t-S.t)/864e5;const dd=Math.abs(d-m);if(dd<bd){bd=dd;best=q}}
-  if(best&&bd<1){const d=(best.t-S.t)/864e5;TX(u(best.p),(d>0?'+':'')+m+' d','rgba(92,242,255,.8)',W/120,-W/120)}}}}
+  if(OC.trail){const tp=trailPts(E).map(q=>u(q.p));PLY(tp,'rgba(92,242,255,.65)',W/400,1);{const pts=trailPts(E);
+ for(const m of[-15,-10,-5,5,10,15]){const t=S.t+m*864e5,i=pts.findIndex(q=>q.t>t);if(i<1)continue;
+  const a=pts[i-1],b=pts[i],f=(t-a.t)/(b.t-a.t),ra=Math.hypot(...a.p),rb=Math.hypot(...b.p),
+   c=Math.max(-1,Math.min(1,(a.p[0]*b.p[0]+a.p[1]*b.p[1]+a.p[2]*b.p[2])/(ra*rb))),th=Math.acos(c),sn=Math.sin(th),
+   k0=th<1e-9?1-f:Math.sin((1-f)*th)/sn,k1=th<1e-9?f:Math.sin(f*th)/sn,r=ra+(rb-ra)*f,
+   p=[0,1,2].map(j=>(k0*a.p[j]/ra+k1*b.p[j]/rb)*r);
+  TX(u(p),(m>0?'+':'')+m+' d','rgba(92,242,255,.8)',W/120,-W/120)}}}
   for(const r of[356400,406700]){const c=[];for(let a=0;a<=72;a++){const t=a*Math.PI/36;c.push([r/Rm*Math.cos(t),r/Rm*Math.sin(t),0])}PLY(c,'#33507f',1,.55)}
   L([mk[0],mk[1],0],mk,'rgba(255,180,100,.8)',W/450,1,[3,3]);TX([mk[0],mk[1],0],'\u03b2 = '+f1(Math.asin(mh[2])/D,3)+'\u00b0','#ffb347',W/100,W/60);
   for(let k=-2;k<=2;k++){const o=[-sh[1]*k*.07,sh[0]*k*.07,0];L(v3.s(sh,.22).map((x,i)=>x+o[i]),v3.s(sh,1.05).map((x,i)=>x+o[i]),'rgba(255,230,160,.45)',1.2,1,[6,6])}
