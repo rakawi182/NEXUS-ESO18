@@ -210,7 +210,9 @@ If this software contributes to published work, please cite the underlying sourc
 
 ## 9. Licence
 
-Not yet determined. Contact the author for terms of use, redistribution, or derivative works.
+This software is released under the MIT License. See the [LICENSE](LICENSE) file for the full text.
+
+The ephemeris values produced by this software are derived from the scientific models listed in §2 and §10. Those underlying models are the property of their respective authors and institutions; the MIT License applies only to the source code and data contained in this repository.
 
 ---
 
