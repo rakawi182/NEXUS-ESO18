@@ -22,7 +22,7 @@ input,select{background:#070e1f;border:1px solid var(--ln);border-radius:6px;pad
 <div class="pn" data-p="orb"><h2>SUN · EARTH · MOON TRIANGLE</h2><div id="oi"></div><div class="cap">3D view in the mean ecliptic frame of date (x: vernal equinox of date, z: north ecliptic pole); drag to rotate, pinch or wheel to zoom, double-tap to reset. Positions are the apparent geocentric Sun (VSOP2013) and Moon (ELP/MPP02 LLR fit) of the HUD engine. ψ = elongation at Earth, i = phase angle at the Moon (illuminated fraction = (1 + cos i)/2), δ = angle at the Sun. EARTH–MOON: Moon orbit, 30-day trail and inclination to the ecliptic at true size, Earth axis tilt and Greenwich meridian from the current sidereal time. SUN–EARTH: Earth orbit sampled from VSOP2013 (e = 0.0167), Earth–Moon distance exaggerated. Accuracy of every number is listed in the panel ACCURACY · MODELS · REFERENCES.</div></div>
 <div class="pn" data-p="mn" id="tc2"></div>
 <div class="card" data-p="mn"><div style="position:relative;width:min(680px,100%);aspect-ratio:1/1;margin:0 auto"><canvas id="mcgl" width="680" height="680" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:0"></canvas><canvas id="mc" width="680" height="680" style="position:absolute;top:0;left:0;width:100%;height:100%;z-index:1"></canvas></div></div>
-<div class="pn" data-p="mn"><h2>DISPLAY</h2><div class="chips" id="mo"></div></div>
+<div class="pn" data-p="mn"><h2>DISPLAY</h2><div class="chips" id="mo"></div></div><div class="pn" data-p="mn"><h2>LUNAR ECLIPSE</h2><div id="le"></div></div>
 <div class="pn" data-p="mn"><h2>LUNAR APPULSES · CATALOGUE STARS</h2><div class="row"><button id="apb">SCAN NEXT 60 DAYS (&lt; 3°)</button></div><div id="ap"></div></div>
 <div class="pn" data-p="mn"><h2>LUNAR PHYSICAL EPHEMERIS</h2><div id="mi"></div><div id="ml"></div><div class="cap">The disk is rendered from the LROC-WAC photographic mosaic (near and far side) with topographic relief from the LRO GLD100 digital elevation model. Lommel–Seeliger shading applied. Tap the disk to read selenographic coordinates, nearest feature and Sun elevation. Geometry: phase and elongation from the apparent geocentric Sun and Moon; libration (l, b), P1/P2/τ from LLIB04 + numerical complements in the principal-axis frame (the mean-Earth frame differs by about 0.02°, not applied); sub-solar point and axis position angle follow from the same frame. Named features are hand-entered and good to roughly ±1° (±30 km). Lommel–Seeliger shading; earthshine scales with the Earth phase.</div></div>
 
@@ -629,6 +629,30 @@ function audit(){const R=[],add=(g,n,res,tol,u,note)=>R.push({g,n,res,tol,u,ok:M
   if(!r){add('Eclipse',nm+': eclipse found',1,0,'',''); continue}
   add('Eclipse',nm+': signed \u03b3',r.sg*r.gam-e.gam,.002,'');add('Eclipse',nm+': '+(e.kind=='solar'?'magnitude':'umbral magnitude'),(e.kind=='solar'?r.mag:r.um)-e.mag,.003,'');
   add('Eclipse',nm+': time of greatest eclipse (TD)',(r.t+timeInfo(r.t).ttmu*1e3-e.tdms)/1e3,90,'s','NASA time = greatest eclipse at surface / min. axis distance')}
+ {let mu=0,mp=0,md=0,bad=0,nL=0;for(const e of AUD.nasa){if(e.kind!='lunar')continue;nL++;const tt=utcFromTT(e.tdms),r=lunarEclipse(tt),I=r&&PG.lunarEclipseInfo(r.t);if(!I){bad++;continue}
+   mu=Math.max(mu,Math.abs(I.umbMag-e.mag),Math.abs(I.umbMag-r.um));mp=Math.max(mp,Math.abs(I.penumMag-r.pm));
+   const Eg=ephSM(I.tg),ceg=Math.cos(Eg.eps),seg=Math.sin(Eg.eps),bm=-Eg.moon[1]*seg+Eg.moon[2]*ceg;if(!(I.sh.ny*bm<0))bad++;
+   for(const m of[-120,-60,-20,0,20,60,120]){const t=I.tg+m*6e4,s2=PG.lunarShadowAt(t),Ei=ephSM(t),S=v3.s(Ei.sun,Ei.Rs*E_AU),M=v3.s(Ei.moon,Ei.mdist),u=v3.s(S,1/v3.n(S)),pp=v3.m(M,v3.s(u,v3.dot(M,u))),Ml=v3.n(M),dT=Math.asin(v3.n(pp)/Ml)/Math.asin(E_K1*E_RE/Ml);md=Math.max(md,s2?Math.abs(s2.dd-dT):9)}}
+  add('Lunar shadow overlay','umbral magnitude vs NASA/Espenak 2026 and vs lunarEclipse(), '+nL+' eclipses, max |\u0394|',mu,.003,'');
+  add('Lunar shadow overlay','penumbral magnitude vs lunarEclipse(), max |\u0394|',mp,.003,'');
+  add('Lunar shadow overlay','shadow offset on the disc (lunar radii) vs direct |M\u22a5|/R\u263d from the Sun\u2013Moon vectors, 7 epochs \u00d7 '+nL+' eclipses, max |\u0394|',md,2e-3,'R\u263d');
+  add('Lunar shadow overlay','orientation, N up: shadow centre on the side opposite to the Moon\u2019s ecliptic latitude, failed checks',bad,0,'','places the umbra on the correct side of the disc')}
+ {const e0=AUD.nasa.find(e=>e.kind=='lunar'),sh=PG.lunarEclipseInfo(lunarEclipse(utcFromTT(e0.tdms)).t).sh;let mo=0;
+  for(const f of[.05,.2,.4,.6,.8,.95]){const rho=sh.ur+(sh.pr-sh.ur)*f,a=sh.pM,b=sh.sS,s2=Math.abs(rho*sh.sM-sh.pS),N=1200,h=2*b/N;let nS=0,nB=0;for(let i=0;i<N;i++){const x=-b+(i+.5)*h;for(let j=0;j<N;j++){const y=-b+(j+.5)*h;if(x*x+y*y<=b*b){nS++;if((x-s2)*(x-s2)+y*y<=a*a)nB++}}}mo=Math.max(mo,Math.abs(PG.lunarObsc(sh,rho)-nB/nS))}
+  add('Lunar shadow overlay','penumbral obscuration O(\u03c1): exact two-disc overlap vs numerical area integration (1200\u00b2 grid on the solar disc), 6 radii, max |\u0394O|',mo,2e-3,'');
+  let bad2=0,prev=2;for(let q=0;q<=400;q++){const rho=sh.ur+(sh.pr-sh.ur)*q/400,O=PG.lunarObsc(sh,rho);if(O>prev+1e-12)bad2++;prev=O}
+  if(Math.abs(PG.lunarObsc(sh,sh.ur)-1)>1e-9)bad2++;if(Math.abs(PG.lunarObsc(sh,sh.pr))>1e-9)bad2++;
+  add('Lunar shadow overlay','penumbral obscuration: O = 1 at the umbral radius, 0 at the penumbral radius, monotone in between, failed checks',bad2,0,'','')}
+ {let eT=0,eD=0,ePA=0,nC=0;for(const e of AUD.nasa){if(e.kind!='lunar')continue;const r=lunarEclipse(utcFromTT(e.tdms)),I=PG.lunarEclipseInfo(r.t);if(!I||!I.C)continue;
+  const dI=t=>{const E=ephSM(t),S=v3.s(E.sun,E.Rs*E_AU),M=v3.s(E.moon,E.mdist),u=v3.s(S,1/v3.n(S)),pp=v3.m(M,v3.s(u,v3.dot(M,u))),Ml=v3.n(M),Sl=v3.n(S),Re=E_RE*(1+E_ENL),pM=Math.asin(Re/Ml),pS=Math.asin(Re/Sl),sS=Math.asin(E_RS/Sl),sM=Math.asin(E_K1*E_RE/Ml);return{d:Math.asin(v3.n(pp)/Ml)/sM,ur:(pM+pS-sS)/sM,pr:(pM+pS+sS)/sM}};
+  const root=(f,lo,hi)=>{let fl=f(lo)>0;for(let k=0;k<44;k++){const m=(lo+hi)/2;if((f(m)>0)===fl)lo=m;else hi=m}return(lo+hi)/2};
+  const paI=t=>{const E=ephSM(t),S=E.sun.map(x=>x*E.Rs*E_AU),M=E.moon.map(x=>x*E.mdist),Sl=Math.hypot(...S),Sh=S.map(x=>x/Sl),dm=M[0]*Sh[0]+M[1]*Sh[1]+M[2]*Sh[2],ov=Sh.map((x,i)=>x*dm-M[i]),Ml=Math.hypot(...M),mh=M.map(x=>x/Ml),q=ov[0]*mh[0]+ov[1]*mh[1]+ov[2]*mh[2],op=ov.map((x,i)=>x-q*mh[i]),zm=mh[2],nor=[-zm*mh[0],-zm*mh[1],1-zm*mh[2]],nl=Math.hypot(...nor),ea=[-mh[1],mh[0],0],el=Math.hypot(...ea);let pa=Math.atan2((op[0]*ea[0]+op[1]*ea[1])/el,(op[0]*nor[0]+op[1]*nor[1]+op[2]*nor[2])/nl)*180/Math.PI;return pa<0?pa+360:pa};
+  for(const [k,ing,kind,ext] of[['p1',1,'pr',1],['u1',1,'ur',1],['u2',1,'ur',0],['u3',0,'ur',0],['u4',0,'ur',1],['p4',0,'pr',1]]){const c=I.C[k];if(!c)continue;nC++;
+   const f=t=>{const x=dI(t);return x.d-(x[kind]+(ext?1:-1))},tr=ing?root(f,I.tg-4*36e5,I.tg):root(f,I.tg,I.tg+4*36e5);eT=Math.max(eT,Math.abs(tr-c.t)/1e3);eD=Math.max(eD,Math.abs(f(c.t)));
+   const want=(paI(c.t)+(ext?0:180))%360;let dp=Math.abs(want-c.pa);dp=Math.min(dp,360-dp);ePA=Math.max(ePA,dp)}}
+  add('Lunar shadow overlay','contact times P1/U1/U2/U3/U4/P4 ('+nC+' contacts): bisection on lunarShadowAt geometry vs independent root-finding on ephSM vectors, max |\u0394t|',eT,.1,'s','');
+  add('Lunar shadow overlay','contact condition |d \u2212 (r \u00b1 1)| at the refined times, max',eD,1e-6,'R\u263d','');
+  add('Lunar shadow overlay','contact position angles (limb, N through E) vs independent sky-plane geometry, max |\u0394PA|',ePA,.01,'\u00b0','external contacts towards the shadow centre, U2/U3 opposite')}
  for(const s of AUD.seasons){const f=s.rd?(t=>{const v=ephSM(t).sun;return Math.asin(v[2])}):(t=>{const v=ephSM(t).sun;return wr(Math.atan2(v[1],v[0])-s.ra)});let a=ms(s.jd)-2*864e5,b=a+4*864e5,fa=f(a);for(let i=0;i<46;i++){const m=(a+b)/2,fm=f(m);if(fm*fa>0){a=m;fa=fm}else b=m}
   add('Season',s.name+' (DE405-based, JD TT)',((a+b)/2-ms(s.jd))/1e3,8,'s','definition: '+(s.rd?'apparent declination = 0':'apparent RA = '+(s.ra*12/Math.PI)+'h'))}
 
@@ -1025,7 +1049,7 @@ function moonRGBA(W,l,b,sun,es,th){const F=frame(l,b,th),{e,ex,ey}=F,out=new Uin
  return out}
 function moonState(E){const o=LIB.at(E),T=o.T,Mv=v3.s(E.moon,E.mdist),Sv=v3.s(E.sun,E.Rs*E_AU),sun=nz(T(nz(v3.m(Sv,Mv)))),F=frame(o.l,o.b,0),nC=T([0,0,1]),
  th=Math.atan2(dt(nC,F.ex),dt(nC,F.ey)),ci=dt(nz(T(v3.s(E.moon,-1))),sun),ph=Math.acos(Math.max(-1,Math.min(1,ci)));return{o,sun,th,ph,k:(1+Math.cos(ph))/2,ls:Math.atan2(sun[1],sun[0])/D,bs:Math.asin(sun[2])/D}}
-let TAB='hud',MO={trail:1},MC={lab:1,grd:1,sky:0,es:1},mImg=null,mKey=null,lastR=0,ageC={t:-1e18,v:0};
+let TAB='hud',MO={trail:1},MC={lab:1,grd:1,sky:0,es:1,shd:0},mImg=null,mKey=null,lastR=0,ageC={t:-1e18,v:0};
 const show=t=>{TAB=t;for(const c of $('main').children){if(c.tagName=='HEADER'||c.id=='tb')continue;const p=c.dataset.p;c.style.display=(p?p.split(' ').includes(t):t=='hud')?'':'none'}document.querySelectorAll('#tb button').forEach(b=>b.classList.toggle('on',b.dataset.t==t));draw(1);accUpdate(1)};
 const nearF=s=>{let b=null,bd=9;for(const L of[MM,CR])for(const m of L)if(m[0]){const d=Math.acos(Math.min(1,dt(s,sv(m[1],m[2]))))/D;if(d<bd){bd=d;b=m[0]}}return[b,bd]};
 function pickRows(st){if(!MC.pick)return kk('Selected point','tap the lunar disk','#6fe3a8');const[la,lo]=MC.pick,s=sv(la,lo),F=frame(st.o.l,st.o.b,0),nf=nearF(s);
@@ -1114,9 +1138,86 @@ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',
  if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',attach);}else{attach();}
 })();
 
+
+function lunarShadowAt(ts){try{const g=geoSM(ts);if(!g||!g.S||!g.M)return null;const S=g.S,M=g.M,Slen=Math.hypot(S[0],S[1],S[2]),Mlen=Math.hypot(M[0],M[1],M[2]);if(Mlen<1e4||Slen<1e8)return null;const ce=(S[0]*M[0]+S[1]*M[1]+S[2]*M[2])/(Slen*Mlen);if(ce>-0.94)return null;const Mn=[M[0]/Mlen,M[1]/Mlen,M[2]/Mlen];const dotS=S[0]*M[0]+S[1]*M[1]+S[2]*M[2];const kk=dotS/(Slen*Slen);const P=[kk*S[0],kk*S[1],kk*S[2]];let ox=P[0]-M[0],oy=P[1]-M[1],oz=P[2]-M[2];const o0=Math.hypot(ox,oy,oz),dm=ox*Mn[0]+oy*Mn[1]+oz*Mn[2];ox-=dm*Mn[0];oy-=dm*Mn[1];oz-=dm*Mn[2];/* same shadow model as lunarEclipse() (NASA/Espenak-calibrated): Earth radius enlarged by E_ENL, solar parallax and semi-diameter included; all in lunar semi-diameters */const Re=E_RE*(1+E_ENL),pM=Math.asin(Re/Mlen),pS=Math.asin(Re/Slen),sS=Math.asin(E_RS/Slen),sM=Math.asin(E_K1*E_RE/Mlen);const E2=ephSM(ts),s2=moonState(E2),F=frame(s2.o.l,s2.o.b,0),w=s2.o.T([ox,oy,oz]);const wx=w[0]*F.ex[0]+w[1]*F.ex[1]+w[2]*F.ex[2],wy=w[0]*F.ey[0]+w[1]*F.ey[1]+w[2]*F.ey[2],wn=Math.hypot(wx,wy)||1,dd=Math.asin(Math.min(1,o0/Mlen))/sM,nx=wx/wn*dd,ny=wy/wn*dd;const ur=(pM+pS-sS)/sM,pr=(pM+pS+sS)/sM;if(dd>pr+1.02)return null;return{nx,ny,ur,pr,dd,pM,pS,sS,sM}}catch(e){return null}}
+
+/* fraction O of the solar disc hidden by the Earth (disc radius pM incl. atmospheric enlargement) as seen from a lunar surface point at distance rho (lunar radii) from the shadow axis;
+   angular radii pM, sS, separation of centres |rho*sM - pS|: O = 1 at rho = ur, O = 0 at rho = pr (exact two-disc overlap area / solar disc area) */
+function lunarObsc(sh,rho){const a=sh.pM,b=sh.sS,s=Math.abs(rho*sh.sM-sh.pS);if(s>=a+b)return 0;if(s<=a-b)return 1;
+ const A=b*b*Math.acos((s*s+b*b-a*a)/(2*s*b))+a*a*Math.acos((s*s+a*a-b*b)/(2*s*a))-.5*Math.sqrt((-s+a+b)*(s+a-b)*(s-a+b)*(s+a+b));return A/(Math.PI*b*b)}
+/* shadow-axis distance d of the Moon centre and the umbral / penumbral radii, all in lunar radii and all at the same instant (the radii vary with the Moon's distance) */
+function lunarGeo(ts){try{const g=geoSM(ts);if(!g||!g.S||!g.M)return null;const S=g.S,M=g.M,Sl=Math.hypot(S[0],S[1],S[2]),Ml=Math.hypot(M[0],M[1],M[2]);if(Ml<1e4||Sl<1e8)return null;const k=(S[0]*M[0]+S[1]*M[1]+S[2]*M[2])/(Sl*Sl),Re=E_RE*(1+E_ENL),pM=Math.asin(Re/Ml),pS=Math.asin(Re/Sl),sS=Math.asin(E_RS/Sl),sM=Math.asin(E_K1*E_RE/Ml);return{d:Math.asin(Math.min(1,Math.hypot(k*S[0]-M[0],k*S[1]-M[1],k*S[2]-M[2])/Ml))/sM,ur:(pM+pS-sS)/sM,pr:(pM+pS+sS)/sM}}catch(e){return null}}
+function lunarEclipseInfo(ts){try{
+ const tg=minF(lunSep,ts-6*36e5,ts+6*36e5);
+ const sh=lunarShadowAt(tg);if(!sh)return null;
+ const umbMag=(sh.ur+1-sh.dd)/2,penumMag=(sh.pr+1-sh.dd)/2;
+ if(penumMag<0)return null;
+ let type='Penumbral';
+ if(umbMag>=1)type='Total';
+ else if(umbMag>0)type='Partial';
+ const fz=(g,k,o)=>g?g.d-(g[k]+o):9;
+ /* contact search outward from the greatest-eclipse instant (the distance is unimodal there): 5-min steps until the contact condition d = r + o is passed, then bisection on lunarGeo() (radii taken at the same instant) */
+ const cr=(k,o,down)=>{const dir=down?-1:1;let b=tg;if(!(fz(lunarGeo(b),k,o)<0))return null;for(let n=1;n<=120;n++){const a=tg+dir*n*3e5;if(fz(lunarGeo(a),k,o)>0){let lo=a,hi=b;for(let q=0;q<22;q++){const m=(lo+hi)/2;if(fz(lunarGeo(m),k,o)>0)lo=m;else hi=m}return(lo+hi)/2}b=a}return null};
+ const u1=cr('ur',1,true),u4=cr('ur',1,false);
+ const u2=sh.ur>1?cr('ur',-1,true):null,u3=sh.ur>1?cr('ur',-1,false):null;
+ const p1=cr('pr',1,true),p4=cr('pr',1,false);
+ /* limb contact points: external contacts lie towards the shadow centre, internal ones (U2, U3) opposite to it; PA = position angle on the limb, N through E (sky) */
+ const ctc=(t,ext)=>{if(!t)return null;const s=lunarShadowAt(t);if(!s||!(s.dd>0))return null;const th=moonState(ephSM(t)).th,q=ext?1:-1,ux=q*s.nx/s.dd,uy=q*s.ny/s.dd,c=Math.cos(th),sn=Math.sin(th),px=ux*c-uy*sn,py=ux*sn+uy*c;let pa=Math.atan2(-px,py)*180/Math.PI;if(pa<0)pa+=360;return{t,ux,uy,pa}};
+ const C={p1:ctc(p1,1),u1:ctc(u1,1),u2:ctc(u2,0),u3:ctc(u3,0),u4:ctc(u4,1),p4:ctc(p4,1)};
+ return{tg,type,umbMag,penumMag,dd:sh.dd,sh,u1,u2,u3,u4,p1,p4,C}
+}catch(e){return null}}
+
+let _leCache={t:-1e18,v:null};
+function lunarEclipseInfoCached(ts){
+ if(Math.abs(ts-_leCache.t)>36e5){_leCache.t=ts;_leCache.v=lunarEclipseInfo(ts);}
+ return _leCache.v;
+}
+function leRows(info){
+ if(!info)return kk('Active eclipse','none at this epoch','#6f82ab');
+ const r=[
+  kk('Type',info.type,info.type=='Total'?'#ff6ad5':info.type=='Partial'?'#ffb347':'#6fe3a8'),
+  kk('Greatest eclipse (UTC)',utc(info.tg).slice(0,19)),
+  kk('Umbral magnitude',info.umbMag.toFixed(4),info.umbMag>0?'#ff6ad5':null),
+  kk('Penumbral magnitude',info.penumMag.toFixed(4),'#6fe3a8'),
+  kk('Shadow offset (lunar radii)',info.dd.toFixed(4)),
+  kk('Umbral / penumbral radius',info.sh.ur.toFixed(4)+' / '+info.sh.pr.toFixed(4))
+ ];
+ const C=info.C||{},row=(lab,c)=>c?kk(lab,utc(c.t).slice(0,19)+' \u00b7 PA '+c.pa.toFixed(1)+'\u00b0'):'';
+ r.push(row('P1 \u00b7 penumbral begins',C.p1),row('U1 \u00b7 umbral begins',C.u1),row('U2 \u00b7 totality begins',C.u2),row('U3 \u00b7 totality ends',C.u3),row('U4 \u00b7 umbral ends',C.u4),row('P4 \u00b7 penumbral ends',C.p4));
+ r.push('<div class="cap">Contacts are refined by bisection of the shadow-axis distance (resolution &lt; 1 ms). PA = position angle of the contact point on the limb, N through E on the sky; marked on the disc at the limb.</div>');
+ return r.join('')
+}
 function drawMoon(force){const cv=$('#mc'),g=cv.getContext('2d'),W=cv.width,E=ephSM(S.t),st=moonState(E);st.o.l+=(MC.dragL||0);st.o.b+=(MC.dragB||0);const th=MC.sky?st.th:0,key=Math.round(S.t/6e3)+'|'+MC.sky+MC.es;
  
- g.clearRect(0,0,W,W);if(window.__renderGL)window.__renderGL(st);const F=frame(st.o.l,st.o.b,th),R=W/2,P=(la,lo)=>{const v=sv(la,lo),x=dt(v,F.ex),y=dt(v,F.ey),z=dt(v,F.e);return[R+(x*F.c-y*F.s)*R,R-(x*F.s+y*F.c)*R,z]};
+ g.clearRect(0,0,W,W);if(window.__renderGL)window.__renderGL(st);if(MC.shd){try{
+ const sh=lunarShadowAt(S.t);
+ if(sh){
+  const R2=W/2,ct=Math.cos(th),stt=Math.sin(th);
+  const px=sh.nx*ct-sh.ny*stt,py=sh.nx*stt+sh.ny*ct;
+  const Xs=R2+px*R2,Ys=R2-py*R2;
+  const uR=Math.max(2,sh.ur*R2),pR=Math.max(uR+2,sh.pr*R2);
+  const rU=sh.ur/sh.pr;
+  g.save();
+  g.beginPath();g.arc(R2,R2,R2,0,7);g.clip();
+  g.globalCompositeOperation='source-over';
+  const grd=g.createRadialGradient(Xs,Ys,0,Xs,Ys,pR);
+  grd.addColorStop(0,'rgba(38,10,5,0.92)');
+  grd.addColorStop(rU*0.4,'rgba(62,16,8,0.78)');
+  grd.addColorStop(rU*0.75,'rgba(105,36,18,0.72)');
+  grd.addColorStop(rU,'rgba(150,68,38,0.62)');
+  /* penumbra: darkening from the exact hidden fraction O of the solar disc (two-disc overlap); display response (1-O)^(1/2.2) */
+  for(let q=1;q<=24;q++){const x=rU+(1-rU)*q/24,O=lunarObsc(sh,x*pR/R2),a=.62*(1-Math.pow(1-O,1/2.2)),m=O*O;grd.addColorStop(x,'rgba('+Math.round(45+105*m)+','+Math.round(22+46*m)+','+Math.round(14+24*m)+','+a.toFixed(4)+')')}
+  g.fillStyle=grd;
+  g.beginPath();g.arc(Xs,Ys,pR,0,7);g.fill();
+  g.lineWidth=1.2;g.strokeStyle='rgba(255,120,80,.85)';g.beginPath();g.arc(Xs,Ys,sh.ur*R2,0,7);g.stroke();g.setLineDash([5,4]);g.strokeStyle='rgba(111,227,168,.85)';g.beginPath();g.arc(Xs,Ys,sh.pr*R2,0,7);g.stroke();g.setLineDash([]);
+  g.restore();
+ }
+ const LEI=lunarEclipseInfoCached(S.t);
+ if(LEI&&LEI.C){const R2=W/2,ct=Math.cos(th),stt=Math.sin(th);g.save();g.font=(W/46|0)+'px ui-monospace,monospace';g.lineWidth=2;
+  for(const [k,lab,col] of[['p1','P1','#6fe3a8'],['u1','U1','#ffb347'],['u2','U2','#ff6ad5'],['u3','U3','#ff6ad5'],['u4','U4','#ffb347'],['p4','P4','#6fe3a8']]){const c=LEI.C[k];if(!c)continue;const px=c.ux*ct-c.uy*stt,py=c.ux*stt+c.uy*ct;g.strokeStyle=col;g.beginPath();g.moveTo(R2+px*R2*.955,R2-py*R2*.955);g.lineTo(R2+px*R2*.995,R2-py*R2*.995);g.stroke();g.fillStyle=col;g.fillText(lab,R2+px*R2*.89-g.measureText(lab).width/2,R2-py*R2*.89+W/120)}
+  g.restore()}
+ const el=$('#le');if(el)el.innerHTML=leRows(LEI);
+}catch(e){}}const F=frame(st.o.l,st.o.b,th),R=W/2,P=(la,lo)=>{const v=sv(la,lo),x=dt(v,F.ex),y=dt(v,F.ey),z=dt(v,F.e);return[R+(x*F.c-y*F.s)*R,R-(x*F.s+y*F.c)*R,z]};
  g.font=(W/50|0)+'px ui-monospace,monospace';g.lineWidth=1;
  if(MC.grd){g.strokeStyle='rgba(92,242,255,.28)';for(let la=-60;la<=60;la+=30){g.beginPath();let on=0;for(let lo=-180;lo<=180;lo+=3){const p=P(la,lo);if(p[2]>0){on?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);on=1}else on=0}g.stroke()}
   for(let lo=-150;lo<=180;lo+=30){g.beginPath();let on=0;for(let la=-90;la<=90;la+=3){const p=P(la,lo);if(p[2]>0){on?g.lineTo(p[0],p[1]):g.moveTo(p[0],p[1]);on=1}else on=0}g.stroke()}
@@ -1229,14 +1330,14 @@ let OFT=-1e9;function orbFrame(R,ts){if(TAB!='orb'||!R)return;const H=HT();if(!H
 let CKT=-1e9,CKS='';function clk(R,ts){if(!R||ts-CKT<100)return;CKT=ts;const ms=(R.S[0][0]-40587)*864e5+R.S[0][1]*1e3,x=uf(ms)+' \u00b7 TT \u2212 UTC '+DT.ttutc(ms).toFixed(3)+' s';if(x!==CKS){CKS=x;document.querySelectorAll('.tv').forEach(e=>e.textContent=x)}}
 function draw(f){ctlStat();accUpdate();if(TAB=='orb'){if(performance.now()-OFT>250)drawOrbit()}else if(TAB=='mn')drawMoon(f);if(TAB!='orb'&&OC.tr&&!TRJ&&Math.abs(S.t-OC.tr.t)>54e5)trailJob(orbScene().E)}
 function init(){document.querySelectorAll('#tb button').forEach(b=>b.onclick=()=>show(b.dataset.t));
- for(const[kx,n]of[['lab','LABELS'],['grd','GRATICULE 30°'],['sky','SKY ORIENTATION'],['es','EARTHSHINE'],['lmb','LIMB (WATTS \u00d720)']]){const b=document.createElement('button');b.textContent=n;b.dataset.k=kx;b.className=MC[kx]?'on':'';b.onclick=()=>{MC[kx]^=1;b.classList.toggle('on',!!MC[kx]);drawMoon(kx=='sky'||kx=='es'||kx=='lmb')};$('#mo').appendChild(b)}
+ for(const[kx,n]of[['lab','LABELS'],['grd','GRATICULE 30°'],['sky','SKY ORIENTATION'],['es','EARTHSHINE'],['lmb','LIMB (WATTS \u00d720)'],['shd','ECLIPSE SHADOW']]){const b=document.createElement('button');b.textContent=n;b.dataset.k=kx;b.className=MC[kx]?'on':'';b.onclick=()=>{MC[kx]^=1;b.classList.toggle('on',!!MC[kx]);drawMoon(kx=='sky'||kx=='es'||kx=='lmb')};$('#mo').appendChild(b)}
  ctl($('#tc1'));ctl($('#tc2'));
  orbitInit();setTimeout(()=>{try{const E=ephSM(S.t);helPts(E);trailJob(E,()=>setTimeout(()=>{if(TAB!='orb')drawOrbit()},50))}catch(e){}},1500);
  $('#mc').onclick=e=>{const L=MC.last;if(!L)return;const r=$('#mc').getBoundingClientRect(),X=(e.clientX-r.left)/r.width*2-1,Y=-((e.clientY-r.top)/r.height*2-1),x=X*L.F.c+Y*L.F.s,y=-X*L.F.s+Y*L.F.c,q=x*x+y*y;if(q>=1){MC.pick=null}else{const z=Math.sqrt(1-q),F=L.F,s=[x*F.ex[0]+y*F.ey[0]+z*F.e[0],x*F.ex[1]+y*F.ey[1]+z*F.e[1],x*F.ex[2]+y*F.ey[2]+z*F.e[2]];MC.pick=[Math.asin(s[2])/D,Math.atan2(s[1],s[0])/D]}drawMoon(0)};
  $('#apb').onclick=()=>{$('#ap').innerHTML='<div class="cap">scanning 60 days\u2026</div>';setTimeout(()=>{const L=appulses(S.t,60,3).slice(0,12);$('#ap').innerHTML=L.length?L.map(a=>'<div class="k" data-t="'+a.t+'" style="cursor:pointer"><em>'+a.star.n+(a.occ?' · POSSIBLE OCCULTATION':'')+'</em><span'+(a.occ?' style="color:#ff6ad5"':'')+'>'+uf(a.t).slice(0,16)+' · '+(a.sep/D).toFixed(2)+'°</span></div>').join('')+'<div class="cap">Tap a row to jump there. Geocentric apparent separation at closest approach; occultation is possible somewhere on Earth when it is below about 1.2° (lunar parallax + radius).</div>':'<div class="cap">No appulse below 3° in the next 60 days.</div>'},30)};
  $('#ap').onclick=e=>{const r=e.target.closest('[data-t]');if(r){HT().set(+r.dataset.t);draw(1)}};
  show('hud');setInterval(()=>draw(0),500)}
-return{init,moonRGBA,moonState,show,draw,drawOrbit,frame,OC,clk,orbFrame}})();
+return{init,moonRGBA,moonState,show,draw,drawOrbit,frame,OC,clk,orbFrame,lunarShadowAt,lunarEclipseInfo,lunarObsc}})();
 /*PAGES-END*/
 
 
